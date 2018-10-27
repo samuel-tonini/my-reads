@@ -9,8 +9,11 @@ import CardMedia from '@material-ui/core/CardMedia';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Book from '@material-ui/icons/Book';
+import BookOutlined from '@material-ui/icons/BookOutlined';
 import Favorite from '@material-ui/icons/Favorite';
+import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
+import LocalLibraryOutlined from '@material-ui/icons/LocalLibraryOutlined';
 
 const styles = theme => ({
   root: {
@@ -21,6 +24,7 @@ const styles = theme => ({
   },
   card: {
     display: 'flex',
+    height: 200,
   },
   details: {
     display: 'flex',
@@ -43,7 +47,7 @@ const styles = theme => ({
   },
 });
 
-const BookList = ({ classes, books }) => (
+const BookList = ({ classes, books, onShelfChange }) => (
   <div className={classes.root}>
     <Grid container spacing={24}>
       {books.map(book => (
@@ -53,32 +57,51 @@ const BookList = ({ classes, books }) => (
               <div className={classes.details}>
                 <CardContent className={classes.content}>
                   <Typography component="h5" variant="h5" className={classes.cardText}>
-                    {book.title}
+                    {book.title || ''}
                   </Typography>
                   <Typography
                     variant="subtitle1"
                     color="textSecondary"
                     className={classes.cardText}
                   >
-                    {book.authors.join(', ')}
+                    {(book.authors || []).join(', ')}
                   </Typography>
                 </CardContent>
                 <div className={classes.controls}>
-                  <IconButton aria-label="Quero ler">
-                    <Favorite />
+                  <IconButton
+                    aria-label="Quero ler"
+                    onClick={() => {
+                      onShelfChange(book, 'wantToRead');
+                    }}
+                  >
+                    {book.shelf === 'wantToRead' ? <Favorite /> : <FavoriteBorder />}
                   </IconButton>
-                  <IconButton aria-label="Lendo">
-                    <LocalLibrary />
+                  <IconButton
+                    aria-label="Lendo"
+                    onClick={() => {
+                      onShelfChange(book, 'currentlyReading');
+                    }}
+                  >
+                    {book.shelf === 'currentlyReading' ? (
+                      <LocalLibrary />
+                    ) : (
+                      <LocalLibraryOutlined />
+                    )}
                   </IconButton>
-                  <IconButton aria-label="Lido">
-                    <Book />
+                  <IconButton
+                    aria-label="Lido"
+                    onClick={() => {
+                      onShelfChange(book, 'read');
+                    }}
+                  >
+                    {book.shelf === 'read' ? <Book /> : <BookOutlined />}
                   </IconButton>
                 </div>
               </div>
               <CardMedia
                 className={classes.cover}
-                image={book.imageLinks.smallThumbnail}
-                title={book.title}
+                image={book.imageLinks ? book.imageLinks.smallThumbnail : ''}
+                title={book.title || ''}
               />
             </Card>
           </Paper>
@@ -91,6 +114,7 @@ const BookList = ({ classes, books }) => (
 BookList.propTypes = {
   classes: PropTypes.instanceOf(Object).isRequired,
   books: PropTypes.instanceOf(Object).isRequired,
+  onShelfChange: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(BookList);

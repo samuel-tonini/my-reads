@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -10,7 +10,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import { withRouter } from 'react-router-dom';
 import BookList from './BookList';
-import { books } from './BooksData';
+import { search } from './BooksAPI';
 
 const styles = theme => ({
   toolbar: theme.mixins.toolbar,
@@ -64,46 +64,91 @@ const styles = theme => ({
   },
 });
 
-const Search = ({ classes, history }) => (
-  <div className={classes.root}>
-    <CssBaseline />
-    <AppBar position="fixed">
-      <Toolbar>
-        <IconButton
-          color="inherit"
-          onClick={() => {
-            history.push('/');
-          }}
-        >
-          <ArrowBack />
-        </IconButton>
-        <Typography variant="h6" color="inherit">
-          Pesquisa
-        </Typography>
-        <div className={classes.search}>
-          <div className={classes.searchIcon}>
-            <SearchIcon />
-          </div>
-          <InputBase
-            placeholder="Digite o nome do livro ou do(s) autor(es)"
-            classes={{
-              root: classes.inputRoot,
-              input: classes.inputInput,
-            }}
-          />
-        </div>
-      </Toolbar>
-    </AppBar>
-    <main className={classes.content}>
-      <div className={classes.toolbar} />
-      <BookList books={books} />
-    </main>
-  </div>
-);
+class Search extends Component {
+  state = {
+    pesquisa: '',
+    books: [],
+  };
+
+  handlePesquisaChange = (e) => {
+    const { value } = e.target;
+    this.setState({ pesquisa: value });
+
+    if (value === '') {
+      this.setState({ books: [] });
+    } else {
+      search(value).then((books) => {
+        const { pesquisa } = this.state;
+
+        if (pesquisa === value.toString()) {
+          this.setState({ books: books.error ? [] : books });
+        }
+      });
+    }
+  };
+
+  render() {
+    const {
+      classes, history, books: booksProps, onShelfChange,
+    } = this.props;
+    const { pesquisa } = this.state;
+    let { books: booksState } = this.state;
+
+    booksState = booksState.map((bookState) => {
+      const [bookProps] = booksProps.filter(b => b.id === bookState.id);
+      if (bookProps) {
+        return { ...bookState, shelf: bookProps.shelf };
+      }
+      return bookState;
+    });
+
+    return (
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar position="fixed">
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                history.push('/');
+              }}
+            >
+              <ArrowBack />
+            </IconButton>
+            <Typography variant="h6" color="inherit">
+              Pesquisa
+            </Typography>
+            <div className={classes.search}>
+              <div className={classes.searchIcon}>
+                <SearchIcon />
+              </div>
+              <InputBase
+                placeholder="Digite o nome do livro ou do(s) autor(es)"
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                autoFocus
+                value={pesquisa}
+                onChange={this.handlePesquisaChange}
+              />
+            </div>
+          </Toolbar>
+        </AppBar>
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
+          <BookList books={booksState} onShelfChange={onShelfChange} />
+        </main>
+      </div>
+    );
+  }
+}
 
 Search.propTypes = {
   classes: PropTypes.instanceOf(Object).isRequired,
   history: PropTypes.instanceOf(Object).isRequired,
+  books: PropTypes.instanceOf(Object).isRequired,
+  onShelfChange: PropTypes.func.isRequired,
 };
 
 export default withRouter(withStyles(styles, { withTheme: true })(Search));

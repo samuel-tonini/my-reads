@@ -11,6 +11,7 @@ import {
   Hidden,
   Divider,
   Badge,
+  Chip,
 } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,7 +22,6 @@ import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { withRouter } from 'react-router-dom';
 import BookList from './BookList';
-import { books } from './BooksData';
 
 const drawerWidth = 240;
 
@@ -58,6 +58,9 @@ const styles = theme => ({
   margin: {
     margin: theme.spacing.unit * 2,
   },
+  chip: {
+    margin: theme.spacing.unit,
+  },
 });
 
 class Library extends Component {
@@ -70,7 +73,9 @@ class Library extends Component {
   };
 
   render() {
-    const { classes, container, history } = this.props;
+    const {
+      classes, container, history, books, onShelfChange, onShelfFilter, filter,
+    } = this.props;
     const { mobileOpen } = this.state;
 
     const drawer = (
@@ -86,13 +91,21 @@ class Library extends Component {
         <Divider />
         <List>
           {[
-            { text: 'Quero Ler', icon: <Favorite /> },
-            { text: 'Lendo', icon: <LocalLibrary /> },
-            { text: 'Lido', icon: <Book /> },
-          ].map(({ text, icon }) => (
-            <ListItem button key={text.toLowerCase().replace(' ', '-')}>
+            { text: 'Quero Ler', icon: <Favorite />, shelf: 'wantToRead' },
+            { text: 'Lendo', icon: <LocalLibrary />, shelf: 'currentlyReading' },
+            { text: 'Lido', icon: <Book />, shelf: 'read' },
+          ].map(({ text, icon, shelf }) => (
+            <ListItem
+              button
+              key={text.toLowerCase().replace(' ', '-')}
+              onClick={() => onShelfFilter(shelf)}
+            >
               <ListItemIcon>
-                <Badge className={classes.margin} badgeContent={4} color="secondary">
+                <Badge
+                  className={classes.margin}
+                  badgeContent={books.filter(book => book.shelf === shelf).length}
+                  color="secondary"
+                >
                   {icon}
                 </Badge>
               </ListItemIcon>
@@ -162,7 +175,19 @@ class Library extends Component {
         </nav>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <BookList books={books} />
+          {filter && (
+            <Chip
+              color="primary"
+              label="Mostrar todos os livros"
+              onClick={() => onShelfFilter('')}
+              className={classes.chip}
+            />
+          )}
+
+          <BookList
+            books={filter ? books.filter(book => book.shelf === filter) : books}
+            onShelfChange={onShelfChange}
+          />
         </main>
       </div>
     );
@@ -177,6 +202,10 @@ Library.propTypes = {
   classes: PropTypes.instanceOf(Object).isRequired,
   container: PropTypes.instanceOf(Object),
   history: PropTypes.instanceOf(Object).isRequired,
+  books: PropTypes.instanceOf(Object).isRequired,
+  onShelfChange: PropTypes.func.isRequired,
+  onShelfFilter: PropTypes.func.isRequired,
+  filter: PropTypes.string.isRequired,
 };
 
 export default withRouter(withStyles(styles, { withTheme: true })(Library));
