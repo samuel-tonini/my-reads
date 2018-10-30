@@ -1,3 +1,8 @@
+import { ApolloClient } from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { RestLink } from 'apollo-link-rest';
+import gql from 'graphql-tag';
+
 const api = 'https://reactnd-books-api.udacity.com';
 
 // Generate a unique token for storing your bookshelf data on the backend server.
@@ -11,32 +16,91 @@ if (!token) {
 const headers = {
   Accept: 'application/json',
   Authorization: token,
+  'Content-Type': 'application/json',
 };
 
-export const get = bookId => fetch(`${api}/books/${bookId}`, { headers })
-  .then(res => res.json())
-  .then(data => data.book);
+const restLink = new RestLink({
+  uri: api, // this is your API base url\
+  headers,
+});
 
-export const getAll = () => fetch(`${api}/books`, { headers })
-  .then(res => res.json())
-  .then(data => data.books);
+const client = new ApolloClient({
+  link: restLink,
+  cache: new InMemoryCache(),
+});
 
-export const update = (book, shelf) => fetch(`${api}/books/${book.id}`, {
-  method: 'PUT',
-  headers: {
-    ...headers,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ shelf }),
-}).then(res => res.json());
+const getAllBooks = gql`
+  query {
+    books @rest(type: "Books", path: "/books") {
+      books @type(name: "Book") {
+        title
+        authors
+        imageLinks @type(name: "ImageLinks") {
+          smallThumbnail
+        }
+        id
+        shelf
+      }
+    }
+  }
+`;
 
-export const search = query => fetch(`${api}/search`, {
-  method: 'POST',
-  headers: {
-    ...headers,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({ query }),
-})
-  .then(res => res.json())
-  .then(data => data.books);
+const getBook = gql`
+  query get {
+    book(id: $id) @rest(type: "Books", path: "/books/:id") {
+      book @type(name: "Book") {
+        title
+        authors
+        imageLinks @type(name: "ImageLinks") {
+          smallThumbnail
+        }
+        id
+        shelf
+      }
+    }
+  }
+`;
+
+const searchBooks = gql`
+  mutation search {
+    search(input: $input) @rest(type: "Books", path: "/search", method: "POST") {
+      books @type(name: "Book") {
+        title
+        authors
+        imageLinks @type(name: "ImageLinks") {
+          smallThumbnail
+        }
+        id
+        shelf
+      }
+    }
+  }
+`;
+
+const updateShelf = gql`
+  mutation update {
+    update(input: $input, id: $id) @rest(type: "Shelfs", path: "/books/:id", method: "PUT") {
+      currentlyReading
+      wantToRead
+      read
+    }
+  }
+`;
+
+export const get = bookId => client.query({ query: getBook, variables: { id: bookId } }).then(res => res.data.book.book);
+
+export const getAll = () => client.query({ query: getAllBooks }).then(res => res.data.books.books);
+
+export const update = (book, shelf) => client
+  .mutate({
+    mutation: updateShelf,
+    variables: { input: { shelf }, id: book.id },
+  })
+  .then(res => res.data.update);
+
+export const search = query => client
+  .mutate({
+    mutation: searchBooks,
+    variables: { input: { query: query.quote() } },
+  })
+  .then(res => res.data.search.books);
