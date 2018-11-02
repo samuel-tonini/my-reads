@@ -101,6 +101,6 @@ export const update = (book, shelf) => client
 export const search = query => client
   .mutate({
     mutation: searchBooks,
-    variables: { input: { query: query.quote() } },
+    variables: { input: { query } },
   })
   .then(res => res.data.search.books);
