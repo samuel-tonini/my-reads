@@ -9,7 +9,7 @@ const styles = () => ({
     flex: '1 0 auto',
   },
   cardText: {
-    maxWidth: 300,
+    width: 300,
   },
 });
 

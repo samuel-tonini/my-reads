@@ -16,7 +16,7 @@ const styles = theme => ({
 
 const BookCardList = ({ classes: { root, paper }, books, onShelfChange }) => (
   <div className={root}>
-    <Grid container spacing={24}>
+    <Grid container spacing={24} justify="center">
       {books.map((book) => {
         const { id } = book;
         return (
