@@ -31,8 +31,17 @@ const LibraryDrawer = ({
   const drawer = (
     <Fragment>
       <div className={toolbar}>
-        <Text variant="h5" align="center" text="My Reads" />
-        <Text variant="h6" align="center" color="textSecondary" text="by: Samuel Tonini" />
+        <Text
+          variant="h5"
+          align="center"
+          text={<a href="https://github.com/samuel-tonini/my-reads">My Reads</a>}
+        />
+        <Text
+          variant="h6"
+          align="center"
+          color="textSecondary"
+          text={<a href="https://github.com/samuel-tonini">by: Samuel Tonini</a>}
+        />
       </div>
       <Divider />
       <LibraryDrawerList list={list} onShelfFilter={onShelfFilter} />
