@@ -22,13 +22,23 @@ class Library extends Component {
     this.setState(state => ({ drawerOpen: !state.drawerOpen }));
   };
 
+  wrapperShelfFilter = (filter) => {
+    const { drawerOpen } = this.state;
+
+    if (drawerOpen) {
+      this.handleDrawerToggle();
+    }
+
+    const { onShelfFilter } = this.props;
+    onShelfFilter(filter);
+  };
+
   render() {
     const {
       classes: { root },
       container,
       books,
       onShelfChange,
-      onShelfFilter,
       filter,
     } = this.props;
     const { drawerOpen } = this.state;
@@ -66,7 +76,7 @@ class Library extends Component {
         <LibraryBar onDrawerToggle={this.handleDrawerToggle} />
         <LibraryDrawer
           list={shelfList}
-          onShelfFilter={onShelfFilter}
+          onShelfFilter={this.wrapperShelfFilter}
           container={container}
           drawerOpen={drawerOpen}
           onDrawerToggle={this.handleDrawerToggle}
@@ -74,7 +84,7 @@ class Library extends Component {
         <LibraryContent
           books={books}
           onShelfChange={onShelfChange}
-          onShelfFilter={onShelfFilter}
+          onShelfFilter={this.wrapperShelfFilter}
           filter={filter}
         />
       </div>

@@ -6,10 +6,12 @@ import BookCardIconSet from './BookCardIconSet';
 import BookCardContent from './BookCardContent';
 import BookCardMedia from './BookCardMedia';
 
-const styles = () => ({
+const styles = theme => ({
   card: {
     display: 'flex',
-    height: 200,
+    [theme.breakpoints.up('lg')]: {
+      height: 200,
+    },
   },
   details: {
     display: 'flex',

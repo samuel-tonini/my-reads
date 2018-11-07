@@ -4,12 +4,20 @@ import { withStyles } from '@material-ui/core/styles';
 import CardContent from '@material-ui/core/CardContent';
 import Text from '../Components/Text';
 
-const styles = () => ({
+const styles = theme => ({
   content: {
     flex: '1 0 auto',
   },
   cardText: {
-    width: 300,
+    [theme.breakpoints.down('sm')]: {
+      width: 100,
+    },
+    [theme.breakpoints.only('md')]: {
+      width: 150,
+    },
+    [theme.breakpoints.up('lg')]: {
+      width: 300,
+    },
   },
 });
 
