@@ -21,7 +21,10 @@ class Search extends Component {
     if (pesquisa === '') {
       this.setState({ books: [] });
     } else {
-      search(pesquisa).then(books => this.setState({ books: books.error ? [] : books }));
+      search(pesquisa).then((books) => {
+        const newBooks = books && !books.error ? books : [];
+        this.setState({ books: newBooks });
+      });
     }
   };
 
@@ -35,13 +38,15 @@ class Search extends Component {
     let { books: booksState } = this.state;
 
     // Merge entre o livros da busca e os das estantes do usuario
-    booksState = booksState.map((bookState) => {
-      const [bookProps] = booksProps.filter(b => b.id === bookState.id);
-      if (bookProps) {
-        return { ...bookState, shelf: bookProps.shelf };
-      }
-      return bookState;
-    });
+    booksState = booksState.length > 0
+      ? booksState.map((bookState) => {
+        const [bookProps] = booksProps.filter(b => b.id === bookState.id);
+        if (bookProps) {
+          return { ...bookState, shelf: bookProps.shelf };
+        }
+        return bookState;
+      })
+      : [];
 
     return (
       <div className={root}>
