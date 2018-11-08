@@ -13,7 +13,10 @@ class App extends Component {
   };
 
   // Busca todos os livros apos a montagem do componente
-  componentDidMount = () => getAll().then(books => this.setState({ books }));
+  async componentDidMount() {
+    const books = await getAll();
+    this.setState({ books });
+  }
 
   // Controle do filtro atual usado
   handleShelfFilter = filter => this.setState({ filter });

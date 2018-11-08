@@ -17,11 +17,11 @@ class Search extends Component {
     books: [],
   };
 
-  handleSearch = (pesquisa) => {
-    if (pesquisa === '') {
+  handleSearch = (query) => {
+    if (query === '') {
       this.setState({ books: [] });
     } else {
-      search(pesquisa).then((books) => {
+      search(query).then((books) => {
         const newBooks = books && !books.error ? books : [];
         this.setState({ books: newBooks });
       });
